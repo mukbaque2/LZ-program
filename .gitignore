@@ -20,6 +20,14 @@ lz-icon-preview.png
 structures/*.pdb
 structures/*.cif
 
+# Program output. These are results, not source: regenerate them rather
+# than committing one run's answers.
+complexes.fasta
+*_candidates.csv
+lz_selftest.txt
+lz-selftest.txt
+docking/
+
 # Local scratch
 *.log
 scratch/
