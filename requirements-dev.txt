@@ -1,0 +1,7 @@
+# The lz package itself needs NOTHING beyond the Python standard library.
+# Everything below is for development, optional features, or packaging.
+
+pytest>=7.0        # test suite
+numpy>=1.24        # `lz calibrate` only (least-squares weight fitting)
+pillow>=10.0       # tools/make_icon.py only
+pyinstaller>=6.0   # build-exe.bat only
