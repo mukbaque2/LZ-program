@@ -24,6 +24,7 @@ from tkinter import filedialog, messagebox, ttk
 
 from .design import design_partner
 from .export import TRIAGE_NOTES, write_multimer_fasta
+from .help import open_help
 from .heptad import assign_register
 from .library import load_library, screen
 from .orthogonal import DEFAULT_CROSS_MARGIN, design_orthogonal_set
@@ -188,6 +189,12 @@ class App(ttk.Frame):
             row=0, column=6, padx=(4, 0)
         )
 
+        # Far right, so it reads as app-level rather than part of the target
+        # row. F1 is bound on the toplevel in `main`.
+        ttk.Button(bar, text="도움말 (F1)", command=self.show_help).grid(
+            row=0, column=7, padx=(16, 0)
+        )
+
     def _build_structure_panel(self) -> None:
         frame = ttk.LabelFrame(self, text="2. measured geometry", padding=6)
         frame.grid(row=1, column=0, sticky="ew", pady=(0, 6))
@@ -277,6 +284,20 @@ class App(ttk.Frame):
         ttk.Label(bar, textvariable=self.status_var).grid(row=0, column=0, sticky="w")
         self.progress = ttk.Progressbar(bar, mode="determinate", length=200)
         self.progress.grid(row=0, column=1, sticky="e")
+
+    def show_help(self) -> None:
+        """Open the bundled documentation.
+
+        Raising an existing window rather than stacking copies: the help is
+        reference material people leave open while they work.
+        """
+        existing = getattr(self, "_help_window", None)
+        if existing is not None and existing.winfo_exists():
+            existing.deiconify()
+            existing.lift()
+            existing.focus_set()
+            return
+        self._help_window = open_help(self)
 
     # --- loading the target ------------------------------------------------
 
@@ -702,6 +723,32 @@ def selftest(report_path: str | Path) -> int:
     )
     check("icon bundled", lambda: _icon_path() is not None)
 
+    from .help import available_documents, load_document
+
+    check("docs bundled", lambda: f"{len(available_documents())} documents")
+    check(
+        "docs readable",
+        lambda: f"{sum(len(load_document(p)) for _, p in available_documents())} chars",
+    )
+
+    def render_every_document() -> str:
+        """Loading a document is not the same as being able to show it."""
+        from .help import render_markdown
+
+        root = tk.Tk()
+        root.withdraw()
+        try:
+            widget = tk.Text(root)
+            total = 0
+            for _, path in available_documents():
+                render_markdown(widget, load_document(path))
+                total += len(widget.get("1.0", "end"))
+            return f"{total} chars rendered"
+        finally:
+            root.destroy()
+
+    check("docs render", render_every_document)
+
     lines.append("")
     lines.append("OK" if failures == 0 else f"{failures} CHECK(S) FAILED")
     Path(report_path).write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -729,7 +776,9 @@ def main(argv: list[str] | None = None) -> int:
             root.iconbitmap(default=str(icon))
         except tk.TclError:
             pass  # a missing or malformed icon must never block startup
-    App(root)
+
+    app = App(root)
+    root.bind("<F1>", lambda _e: app.show_help())
     root.mainloop()
     return 0
 

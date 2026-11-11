@@ -459,3 +459,79 @@ def test_icon_is_found_in_the_source_tree():
     path = _icon_path()
     assert path is None or path.suffix == ".ico"
 
+
+
+# --- in-app help -----------------------------------------------------------
+
+def test_help_window_opens_with_the_documents(app):
+    window = app.show_help() or app._help_window
+    try:
+        assert window.winfo_exists()
+        assert window.listbox.size() >= 5
+        assert "점수" in " ".join(
+            window.listbox.get(i) for i in range(window.listbox.size())
+        )
+    finally:
+        window.destroy()
+
+
+def test_help_window_is_reused_rather_than_stacked(app):
+    """Help is reference material people leave open while they work."""
+    app.show_help()
+    first = app._help_window
+    app.show_help()
+    try:
+        assert app._help_window is first
+    finally:
+        first.destroy()
+
+
+def test_help_reopens_after_being_closed(app):
+    app.show_help()
+    first = app._help_window
+    first.destroy()
+    app.update()
+    app.show_help()
+    second = app._help_window
+    try:
+        assert second is not first
+        assert second.winfo_exists()
+    finally:
+        second.destroy()
+
+
+def test_help_window_switches_documents(app):
+    app.show_help()
+    window = app._help_window
+    try:
+        window.show(0)
+        first = window.text.get("1.0", "end")
+        window.show(2)
+        second = window.text.get("1.0", "end")
+        assert first != second
+    finally:
+        window.destroy()
+
+
+def test_following_a_document_link_switches_panes(app):
+    app.show_help()
+    window = app._help_window
+    try:
+        window.show(1)                      # docs/GUI.md
+        before = window.text.get("1.0", "end")
+        window._follow("../DECISIONS.md")
+        after = window.text.get("1.0", "end")
+        assert before != after
+        assert "DECISIONS" in window.status.get()
+    finally:
+        window.destroy()
+
+
+def test_unknown_link_reports_instead_of_failing(app):
+    app.show_help()
+    window = app._help_window
+    try:
+        window._follow("does/not/exist.md")
+        assert "포함되어 있지 않습니다" in window.status.get()
+    finally:
+        window.destroy()

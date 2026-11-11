@@ -31,6 +31,13 @@ a = Analysis(
     datas=[
         (str(project / "data"), "data"),
         (str(project / "lz.ico"), "."),
+        # The in-app Help window reads these. Paths must be preserved so
+        # lz.help.DOCUMENTS resolves them the same way frozen or not.
+        (str(project / "docs"), "docs"),
+    ] + [
+        (str(project / name), ".")
+        for name in ("README.md", "DECISIONS.md", "CONTRIBUTING.md")
+        if (project / name).exists()
     ],
     hiddenimports=[],
     hookspath=[],
