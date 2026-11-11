@@ -21,6 +21,8 @@ pip install pytest numpy
 
 ## 실행 프로그램 (GUI)
 
+> 버튼별 기능과 화면 요소는 **[docs/GUI.md](docs/GUI.md)** 에 전부 정리되어 있습니다.
+
 **Python 없이 실행**하려면 `dist\lz.exe` — 단일 파일이고 설치가 필요 없습니다.
 
 소스에서 실행하려면 `run-gui.bat` 더블클릭, 또는:
