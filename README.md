@@ -271,6 +271,8 @@ CSV 열: `sequence1,sequence2,tm`. 최소제곱으로 세 항의 가중치를 �
 
 ## 점수의 한계 — 꼭 읽으세요
 
+> 점수를 어떻게 매기는지 전부 보려면 **[docs/SCORING.md](docs/SCORING.md)**.
+
 점수는 **순위용이지 에너지가 아닙니다.** `params.py`의 상수는 두 종류입니다:
 
 - **측정값**: 나선 성향은 Pace & Scholtz (1998)에서 그대로 가져왔습니다.
